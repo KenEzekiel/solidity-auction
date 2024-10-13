@@ -8,8 +8,6 @@ import type {
   FunctionFragment,
   Result,
   Interface,
-  EventFragment,
-  AddressLike,
   ContractRunner,
   ContractMethod,
   Listener,
@@ -18,7 +16,6 @@ import type {
   TypedContractEvent,
   TypedDeferredTopicFilter,
   TypedEventLog,
-  TypedLogDescription,
   TypedListener,
   TypedContractMethod,
 } from "../common";
@@ -32,10 +29,6 @@ export interface MewTokenAuctionAppInterface extends Interface {
       | "newBid"
       | "withdraw"
   ): FunctionFragment;
-
-  getEvent(
-    nameOrSignatureOrTopic: "MewAuctionEnd" | "MewAuctionNewBid"
-  ): EventFragment;
 
   encodeFunctionData(
     functionFragment: "endAuction",
@@ -60,31 +53,6 @@ export interface MewTokenAuctionAppInterface extends Interface {
   decodeFunctionResult(functionFragment: "getWinner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "newBid", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
-}
-
-export namespace MewAuctionEndEvent {
-  export type InputTuple = [winner: AddressLike];
-  export type OutputTuple = [winner: string];
-  export interface OutputObject {
-    winner: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace MewAuctionNewBidEvent {
-  export type InputTuple = [user: AddressLike, amount: BigNumberish];
-  export type OutputTuple = [user: string, amount: bigint];
-  export interface OutputObject {
-    user: string;
-    amount: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export interface MewTokenAuctionApp extends BaseContract {
@@ -160,42 +128,5 @@ export interface MewTokenAuctionApp extends BaseContract {
     nameOrSignature: "withdraw"
   ): TypedContractMethod<[], [void], "nonpayable">;
 
-  getEvent(
-    key: "MewAuctionEnd"
-  ): TypedContractEvent<
-    MewAuctionEndEvent.InputTuple,
-    MewAuctionEndEvent.OutputTuple,
-    MewAuctionEndEvent.OutputObject
-  >;
-  getEvent(
-    key: "MewAuctionNewBid"
-  ): TypedContractEvent<
-    MewAuctionNewBidEvent.InputTuple,
-    MewAuctionNewBidEvent.OutputTuple,
-    MewAuctionNewBidEvent.OutputObject
-  >;
-
-  filters: {
-    "MewAuctionEnd(address)": TypedContractEvent<
-      MewAuctionEndEvent.InputTuple,
-      MewAuctionEndEvent.OutputTuple,
-      MewAuctionEndEvent.OutputObject
-    >;
-    MewAuctionEnd: TypedContractEvent<
-      MewAuctionEndEvent.InputTuple,
-      MewAuctionEndEvent.OutputTuple,
-      MewAuctionEndEvent.OutputObject
-    >;
-
-    "MewAuctionNewBid(address,uint256)": TypedContractEvent<
-      MewAuctionNewBidEvent.InputTuple,
-      MewAuctionNewBidEvent.OutputTuple,
-      MewAuctionNewBidEvent.OutputObject
-    >;
-    MewAuctionNewBid: TypedContractEvent<
-      MewAuctionNewBidEvent.InputTuple,
-      MewAuctionNewBidEvent.OutputTuple,
-      MewAuctionNewBidEvent.OutputObject
-    >;
-  };
+  filters: {};
 }

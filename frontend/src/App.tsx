@@ -1,17 +1,70 @@
 import { Box, Text, Image, Input, Button, useToast } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import cat from "./assets/cat.png";
 import { useWeb3 } from "./hooks/useWeb3";
+import { getGasPrice, getMaxBidAmount, getWinner } from "./eth/app";
+import AuctionButtons from "./AuctionButtons";
 
 function App() {
-  const { account, connect, disconnect } = useWeb3();
-  const [highestPrice] = useState("0");
+  const { account, connect, disconnect, web3, auctionEnded } = useWeb3();
+  const [highestPrice, setHighestPrice] = useState("0");
   const [bidAmount, setBidAmount] = useState("");
-  const [gasPriceTime] = useState(0);
-  const [winner] = useState("");
+  const [gasPriceTime, setGasPriceTime] = useState(0);
+  const [winner, setWinner] = useState("");
+  const toast = useToast();
+
+  const handleBidAmountChange = (event) => {
+    setBidAmount(event.target.value);
+  };
+
+  async function updatePrice() {
+    // console.log("web3:", web3);
+    if (web3) {
+      try {
+        const price = await getMaxBidAmount(web3);
+        setHighestPrice(price.toString());
+      } catch (e) {
+        console.error("Failed to update price:", e);
+      }
+    }
+  }
+
+  async function updateGasPriceTime() {
+    if (web3) {
+      try {
+        const price = await getGasPrice(web3);
+        setGasPriceTime(Number(price) / 1_000_000_000);
+      } catch (e) {
+        console.error("Failed to update gas price:", e);
+      }
+    }
+  }
+
+  async function updateWinner() {
+    if (web3) {
+      try {
+        const winner = await getWinner(web3);
+        setWinner(winner);
+      } catch (e) {
+        console.error("Failed to update winner:", e);
+      }
+    }
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!auctionEnded) {
+        updateGasPriceTime();
+        updatePrice();
+        updateWinner();
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  });
 
   return (
     <Box display="flex" flexDirection="column" justifyContent="center">
+      {/* Header */}
       <Box padding={4} backgroundColor="blue.500" color="white" display="flex">
         <Box>
           <Text fontWeight="bold" fontSize="xl">
@@ -20,21 +73,19 @@ function App() {
         </Box>
         <Box marginLeft="auto" display="flex" alignItems="center">
           {account ? (
-            <Box>
-              <Box>Account: {account}</Box>
-            </Box>
+            <Box>Account: {account}</Box>
           ) : (
-            <Box>
-              <Button onClick={connect}>Login</Button>
-            </Box>
+            <Button onClick={connect}>Login</Button>
           )}
         </Box>
         {account && (
-          <Box marginLeft={2}>
-            <Button onClick={disconnect}>Logout</Button>
-          </Box>
+          <Button onClick={disconnect} marginLeft={2}>
+            Logout
+          </Button>
         )}
       </Box>
+
+      {/* Main content */}
       <Box
         padding={4}
         display="flex"
@@ -44,38 +95,37 @@ function App() {
       >
         <Box
           display="flex"
-          textAlign="center"
           flexDirection="column"
           marginBottom={4}
+          textAlign="center"
         >
-          <Text fontSize="2xl" marginBottom={3}>
-            Current Auction Object
-          </Text>
+          <Text fontSize="2xl">Current Auction Object</Text>
           <Image src={cat} alt="cat" marginBottom={3} />
           <Text fontSize="2xl">Cat</Text>
-          <Text fontSize="2xl">Highest Price : {highestPrice} ETH</Text>
-          {winner != "0x0000000000000000000000000000000000000000" && (
-            <Text fontSize="xl">Winner : {winner}</Text>
-          )}
+          <Text fontSize="2xl">Highest Price: {highestPrice} ETH</Text>
+          {winner &&
+            winner !== "0x0000000000000000000000000000000000000000" && (
+              <Text fontSize="xl">Winner: {winner}</Text>
+            )}
         </Box>
+
         <Box minWidth="25%">
           <Text fontSize="2xl" marginBottom={3}>
             Insert your offer
           </Text>
-          <Box>
-            <Input
-              placeholder="Your offer (ETH)"
-              value={bidAmount}
-              type="number"
-              onChange={(e) => setBidAmount(e.target.value)}
-            />
-          </Box>
+          <Input
+            placeholder="Enter bid amount"
+            value={bidAmount}
+            onChange={handleBidAmountChange}
+            mb={3}
+          />
           <Text>Gas Price: {gasPriceTime} gwei</Text>
-          <Box marginTop={3} display="flex" gap={3}>
-            <Button>Submit</Button>
-            <Button>Withdraw</Button>
-            <Button>End Auction</Button>
-          </Box>
+
+          <AuctionButtons
+            web3={web3}
+            account={account}
+            bidAmount={parseFloat(bidAmount)}
+          />
         </Box>
       </Box>
     </Box>

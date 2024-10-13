@@ -27,7 +27,7 @@ export interface MewAuctionAppInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "endAuction"
-      | "getMaxBidAmount"
+      | "getCurrentBid"
       | "getWinner"
       | "newBid"
       | "withdraw"
@@ -42,7 +42,7 @@ export interface MewAuctionAppInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getMaxBidAmount",
+    functionFragment: "getCurrentBid",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "getWinner", values?: undefined): string;
@@ -51,7 +51,7 @@ export interface MewAuctionAppInterface extends Interface {
 
   decodeFunctionResult(functionFragment: "endAuction", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "getMaxBidAmount",
+    functionFragment: "getCurrentBid",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getWinner", data: BytesLike): Result;
@@ -129,7 +129,7 @@ export interface MewAuctionApp extends BaseContract {
 
   endAuction: TypedContractMethod<[], [void], "nonpayable">;
 
-  getMaxBidAmount: TypedContractMethod<[], [bigint], "view">;
+  getCurrentBid: TypedContractMethod<[], [bigint], "view">;
 
   getWinner: TypedContractMethod<[], [string], "view">;
 
@@ -145,7 +145,7 @@ export interface MewAuctionApp extends BaseContract {
     nameOrSignature: "endAuction"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "getMaxBidAmount"
+    nameOrSignature: "getCurrentBid"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "getWinner"
