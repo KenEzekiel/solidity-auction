@@ -1,1 +1,2 @@
-# demo-auction-app
+# Solidity Auction App
+
